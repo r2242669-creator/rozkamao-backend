@@ -1,6 +1,8 @@
 import os
 import json
 import logging
+import asyncio
+from threading import Thread
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -12,13 +14,9 @@ app = Flask(__name__)
 CORS(app)
 
 DB_FILE = "users_db.json"
-BOT_TOKEN = os.getenv("8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE")
 
-# Render App URL
-WEBHOOK_URL = "https://rozkamao-backend.onrender.com"
-
-# Initialize Telegram Application properly
-application = Application.builder().token(BOT_TOKEN).build()
+# DHAYAN SE: Iske beech mein apna wahi sahi wala Token paste karna jo tumne BotFather se liya tha
+BOT_TOKEN = "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -34,18 +32,6 @@ def save_db(data):
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({"status": "running", "bot": "RozKamao"}), 200
-
-# Telegram Webhook Route - Isey Telegram hit karega
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    if request.method == "POST":
-        try:
-            update = Update.de_json(request.get_json(force=True), application.bot)
-            import asyncio
-            asyncio.run(application.process_update(update))
-        except Exception as e:
-            logging.error(f"Error processing update: {e}")
-    return "OK", 200
 
 @app.route('/api/user', methods=['GET', 'POST'])
 def sync_user():
@@ -104,19 +90,19 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ref_link = f"https://t.me/{context.bot.username}?start={user_id}"
         await query.message.reply_text(f"👥 **Aapki Referral Link:**\n{ref_link}\n\nPer refer ₹10 milenge!")
 
-# Handlers register karein
-application.add_handler(CommandHandler("start", start))
-application.add_handler(CallbackQueryHandler(button_click))
+def start_bot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_click))
+    application.run_polling(close_loop=False)
 
 if __name__ == '__main__':
-    import asyncio
-    # Startup par webhook register karne ka jugad
-    try:
-        asyncio.run(application.initialize())
-        asyncio.run(application.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook"))
-        logging.info("Webhook set successfully!")
-    except Exception as e:
-        logging.error(f"Failed to set webhook: {e}")
-
+    bot_thread = Thread(target=start_bot)
+    bot_thread.daemon = True
+    bot_thread.start()
+    
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+    
