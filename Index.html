@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RozKamao App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #151f2b; color: white; text-align: center; padding: 20px; }
+        .container { margin-top: 50px; }
+        .balance-box { background-color: #1e2d3e; padding: 20px; border-radius: 10px; display: inline-block; margin-bottom: 30px; min-width: 200px; }
+        .btn { background-color: #2481cc; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🚀 RozKamao Mini App 🚀</h2>
+        <div class="balance-box">
+            <h3>💵 Aapka Balance</h3>
+            <h1 id="balance-display">₹0</h1>
+        </div>
+        <br><br>
+        <button class="btn" id="watch-ad-btn" onclick="showRewardAd()">📺 Watch Ad & Earn ₹10</button>
+    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const user = tg.initDataUnsafe?.user;
+        const userId = user ? user.id.toString() : "12345678";
+        const BACKEND_URL = "https://rozkamao-backend.onrender.com";
+        const AdController = window.Adsgram.init({ blockId: "35886" });
+
+        async function loadUserBalance() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
+                const data = await response.json();
+                if (data && data.balance !== undefined) {
+                    document.getElementById("balance-display").innerText = "₹" + data.balance;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function showRewardAd() {
+            const btn = document.getElementById("watch-ad-btn");
+            btn.disabled = true;
+            AdController.show()
+                .then(async () => {
+                    alert("🎉 Ad successfully watched! Aapko ₹10 mil gaye.");
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ add_balance: 10 })
+                        });
+                        const updatedData = await response.json();
+                        document.getElementById("balance-display").innerText = "₹" + updatedData.balance;
+                    } catch (err) { console.error(err); }
+                    btn.disabled = false;
+                })
+                .catch((err) => {
+                    alert("⚠️ Ad skip kar diya!");
+                    btn.disabled = false;
+                });
+        }
+        loadUserBalance();
+    </script>
+</body>
+  </html>
+  
