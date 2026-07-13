@@ -1,129 +1,104 @@
-import os
-import json
-import logging
-import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+from pymongo import MongoClient
+import requests
+import time
 
 app = Flask(__name__)
 CORS(app)
 
-DB_FILE = "users_db.json"
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE")
-TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
+# 🚨 APNA REAL MONGODB LINK DALEIN AUR <db_password> KO HATA KAR REAL PASSWORD LIKHEIN
+MONGO_URL = "mongodb+srv://Rahul2242669:APNA_PASSWORD_YAHAN_LIKH@cluster0.ot3slvg.mongodb.net/?appName=Cluster0"
+BOT_TOKEN = "7334751430:AAElb8W_aN42b-W0m85yS5g6j8s_Xexample"  # <-- REAL TG BOT TOKEN HERE
+ADMIN_PASSWORD = "MERA_SECRET_PASSWORD_123"
 
-def load_db():
-    if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r") as f:
-            try: return json.load(f)
-            except: return {}
-    return {}
+# MongoDB Database Connector Setup
+client = MongoClient(MONGO_URL)
+db = client['rozkamao_db']
+users_collection = db['users']
 
-def save_db(data):
-    with open(DB_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+def get_user_db(uid):
+    user = users_collection.find_one({"user_id": uid})
+    if not user:
+        user = {
+            "user_id": uid, 
+            "balance": 0, 
+            "total_earned": 0, 
+            "ads_watched": 0
+        }
+        users_collection.insert_one(user)
+    return user
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"status": "running", "bot": "RozKamao Webhook"}), 200
+    return jsonify({"status": "running", "database": "MongoDB Connected"})
 
-# TELEGRAM WEBHOOK ROUTE - Is par koi background loop ya thread nahi hai
-@app.route('/webhook', methods=['POST'])
-def telegram_webhook():
-    update = request.get_json(force=True)
-    
-    # 1. Handling Message Commands (/start)
-    if "message" in update and "text" in update["message"]:
-        msg = update["message"]
-        chat_id = msg["chat"]["id"]
-        text = msg["text"]
-        user_id = str(msg["from"]["id"])
-        first_name = msg["from"].get("first_name", "User")
-        
-        if text.startswith("/start"):
-            db = load_db()
-            if user_id not in db:
-                db[user_id] = {"balance": 0, "refers": 0}
-                
-                # Referral Management
-                parts = text.split()
-                if len(parts) > 1:
-                    referrer = parts[1]
-                    if referrer != user_id and referrer in db:
-                        db[referrer]['balance'] = int(db[referrer].get('balance', 0)) + 10
-                        db[referrer]['refers'] = int(db[referrer].get('refers', 0)) + 1
-                        try:
-                            requests.post(f"{TELEGRAM_API}/sendMessage", json={
-                                "chat_id": int(referrer), 
-                                "text": "🎉 **New Referral!** Aapko ₹10 mile."
-                            })
-                        except:
-                            pass
-                save_db(db)
-            
-            welcome_text = f"👋 Welcome {first_name} to RozKamao App!\n\n👇 Niche se app kholo:"
-            reply_markup = {
-                "inline_keyboard": [
-                    [{"text": "🚀 Open RozKamao App", "web_app": {"url": "https://reliable-biscuit-867102.netlify.app"}}],
-                    [{"text": "👥 Refer Link Get", "callback_data": "get_link"},
-                     {"text": "💰 Wallet", "callback_data": "get_wallet"}]
-                ]
-            }
-            requests.post(f"{TELEGRAM_API}/sendMessage", json={
-                "chat_id": chat_id, "text": welcome_text, "reply_markup": reply_markup
-            })
-            
-    # 2. Handling Button Actions
-    elif "callback_query" in update:
-        query = update["callback_query"]
-        query_id = query["id"]
-        chat_id = query["message"]["chat"]["id"]
-        user_id = str(query["from"]["id"])
-        data = query["data"]
-        
-        requests.post(f"{TELEGRAM_API}/answerCallbackQuery", json={"callback_query_id": query_id})
-        db = load_db()
-        
-        if data == "get_wallet":
-            bal = db.get(user_id, {}).get('balance', 0)
-            ref = db.get(user_id, {}).get('refers', 0)
-            requests.post(f"{TELEGRAM_API}/sendMessage", json={
-                "chat_id": chat_id, "text": f"💰 **WALLET**\n\n💵 Balance: ₹{bal}\n📊 Refers: {ref}"
-            })
-        elif data == "get_link":
-            try:
-                bot_info = requests.get(f"{TELEGRAM_API}/getMe").json()
-                bot_username = bot_info["result"]["username"]
-            except:
-                bot_username = "RozKamaoLoot_bot"
-            ref_link = f"https://t.me/{bot_username}?start={user_id}"
-            requests.post(f"{TELEGRAM_API}/sendMessage", json={
-                "chat_id": chat_id, "text": f"👥 **Aapki Referral Link:**\n{ref_link}\n\nPer refer ₹10 milenge!"
-            })
-
-    return "OK", 200
-
+# --- USER BALANCES & DATA MANAGEMENT ---
 @app.route('/api/user', methods=['GET', 'POST'])
-def sync_user():
-    user_id = request.args.get('user_id')
-    if not user_id:
-        return jsonify({"error": "Missing user_id"}), 400
-    db = load_db()
-    
-    if user_id not in db:
-        db[user_id] = {"balance": 0, "refers": 0}
-        save_db(db)
+def user_route():
+    if request.method == 'GET':
+        uid = request.args.get('user_id')
+        if not uid:
+            return jsonify({"error": "Missing user_id"}), 400
+        user = get_user_db(uid)
+        user.pop('_id', None)
+        return jsonify(user)
         
-    if request.method == 'POST':
-        req_data = request.get_json()
-        if req_data and 'add_balance' in req_data:
-            db[user_id]['balance'] = int(db[user_id].get('balance', 0)) + int(req_data['add_balance'])
-            save_db(db)
+    elif request.method == 'POST':
+        data = request.json or {}
+        uid = data.get('user_id') or request.args.get('user_id')
+        action = data.get('action') or request.args.get('action')
+        amount = int(data.get('amount') or request.args.get('add_balance') or 0)
+        
+        if not uid:
+            return jsonify({"error": "Missing user_id"}), 400
             
-    return jsonify(db[user_id])
+        # 1. Action Watch Ad -> Increments Balance + Ads Count 
+        if action == "watch_ad" or request.args.get('add_balance'):
+            add_val = amount if amount else 5
+            users_collection.update_one(
+                {"user_id": uid},
+                {"$inc": {"balance": add_val, "total_earned": add_val, "ads_watched": 1}}
+            )
+            
+        # 2. Action Join Channel Task -> Rewards 10 Rs
+        elif action == "join_channel":
+            users_collection.update_one(
+                {"user_id": uid},
+                {"$inc": {"balance": 10, "total_earned": 10}}
+            )
+            
+        updated_user = get_user_db(uid)
+        updated_user.pop('_id', None)
+        return jsonify(updated_user)
+
+# --- 📢 ADMIN TELEGRAM BROADCAST SYSTEM ---
+@app.route('/api/admin/broadcast', methods=['POST'])
+def broadcast():
+    data = request.json
+    if not data or data.get("secret_key") != ADMIN_PASSWORD:
+        return jsonify({"error": "Unauthorized Access"}), 403
+        
+    msg = data.get("message")
+    if not msg:
+        return jsonify({"error": "Blank Message"}), 400
+        
+    success = 0
+    all_users = users_collection.find({})
+    
+    for u in all_users:
+        uid = u.get("user_id")
+        try:
+            url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+            res = requests.post(url, json={"chat_id": uid, "text": msg}, timeout=4)
+            if res.status_code == 200:
+                success += 1
+            time.sleep(0.05) # Safe gap to avoid Telegram Ban
+        except:
+            pass
+            
+    return jsonify({"status": "success", "sent_to": success})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000)
+    
