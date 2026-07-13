@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 DB_FILE = "users_db.json"
-BOT_TOKEN = os.getenv"8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"
+BOT_TOKEN = os.getenv("8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE")
 
 # Render App URL
 WEBHOOK_URL = "https://rozkamao-backend.onrender.com"
