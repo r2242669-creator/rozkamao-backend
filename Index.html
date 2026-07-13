@@ -3,33 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RozKamao App</title>
+    <title>RozKamao Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #151f2b; color: white; text-align: center; padding: 20px; }
-        .container { margin-top: 50px; }
-        .balance-box { background-color: #1e2d3e; padding: 20px; border-radius: 10px; display: inline-block; margin-bottom: 30px; min-width: 200px; }
-        .btn { background-color: #2481cc; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: radial-gradient(circle at top, #1a2639 0%, #0d131e 100%);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .app-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 35px 25px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .header h2 {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .header p {
+            font-size: 13px;
+            color: #7085a0;
+            margin-bottom: 35px;
+            font-weight: 500;
+        }
+        .balance-card {
+            background: linear-gradient(135deg, rgba(36, 129, 204, 0.15) 0%, rgba(0, 242, 254, 0.05) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 20px;
+            padding: 25px 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 242, 254, 0.05);
+        }
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .balance-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00f2fe;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .btn-container {
+            position: relative;
+        }
+        .btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #0d131e;
+            border: none;
+            padding: 18px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 10px rgba(79, 172, 254, 0.2);
+        }
+        .btn:disabled {
+            background: #1e2d3e;
+            color: #526882;
+            box-shadow: none;
+            cursor: not-allowed;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn-icon {
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>🚀 RozKamao Mini App 🚀</h2>
-        <div class="balance-box">
-            <h3>💵 Aapka Balance</h3>
-            <h1 id="balance-display">₹0</h1>
+
+    <div class="app-card">
+        <div class="header">
+            <h2>RozKamao Pro</h2>
+            <p>Watch • Earn • Withdraw</p>
         </div>
-        <br><br>
-        <button class="btn" id="watch-ad-btn" onclick="showRewardAd()">📺 Watch Ad & Earn ₹10</button>
+
+        <div class="balance-card">
+            <div class="balance-label">Available Balance</div>
+            <div class="balance-amount" id="balance-display">₹0</div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn" id="watch-ad-btn" onclick="showRewardAd()">
+                <span class="btn-icon">📺</span>
+                <span class="btn-text">Watch Ad & Earn ₹10</span>
+            </button>
+        </div>
     </div>
+
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        
+        // Telegram theme integration
+        if(tg.backgroundColor) {
+            document.body.style.background = `radial-gradient(circle at top, ${tg.secondaryBgColor || '#1a2639'} 0%, ${tg.bgColor || '#0d131e'} 100%)`;
+        }
+
         const user = tg.initDataUnsafe?.user;
         const userId = user ? user.id.toString() : "12345678";
         const BACKEND_URL = "https://rozkamao-backend.onrender.com";
-        const AdController = window.Adsgram.init({ blockId: "35886" });
+        const AdController = window.Adsgram.init({ blockId: "38196" });
 
         async function loadUserBalance() {
             try {
@@ -44,9 +174,10 @@
         function showRewardAd() {
             const btn = document.getElementById("watch-ad-btn");
             btn.disabled = true;
+            
             AdController.show()
                 .then(async () => {
-                    alert("🎉 Ad successfully watched! Aapko ₹10 mil gaye.");
+                    tg.HapticFeedback.notificationOccurred('success');
                     try {
                         const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`, {
                             method: "POST",
@@ -59,12 +190,13 @@
                     btn.disabled = false;
                 })
                 .catch((err) => {
-                    alert("⚠️ Ad skip kar diya!");
+                    tg.HapticFeedback.notificationOccurred('warning');
                     btn.disabled = false;
                 });
         }
+        
         loadUserBalance();
     </script>
 </body>
-  </html>
-  
+</html>
+
