@@ -7,114 +7,300 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: sans-serif; }
-        body { background: #050b10; color: #ffffff; padding: 16px; min-height: 100vh; }
-        .main-card { background: #102531; border: 1px solid #00f2fe; border-radius: 24px; padding: 24px; margin-bottom: 20px; }
-        .username { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-        .balance-amount { font-size: 38px; font-weight: 900; color: #00ffcc; margin: 6px 0; }
-        .ad-trigger-btn { width: 100%; background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; padding: 20px; border-radius: 18px; color: #050b10; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 28px; }
-        .task-card { background: rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'SF Pro Display', -apple-system, Roboto, Helvetica, sans-serif;
+        }
+        body {
+            background: radial-gradient(circle at top, #0c1b24 0%, #050b10 100%);
+            color: #ffffff;
+            padding: 16px;
+            padding-bottom: 90px;
+            min-height: 100vh;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .top-contributor {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #00f2fe;
+        }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nav-dock { position: fixed; bottom: 0; left: 0; right: 0; background: #070f16; display: grid; grid-template-columns: repeat(4, 1fr); padding: 12px 0; }
-        .nav-item { text-align: center; color: #526882; cursor: pointer; font-size: 12px; }
+
+        .main-card {
+            background: linear-gradient(145deg, rgba(16, 37, 49, 0.7) 0%, rgba(7, 15, 22, 0.9) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.15);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+        }
+        .user-tag { font-size: 13px; color: #7085a0; margin-bottom: 4px; }
+        .username { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .balance-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #7085a0; font-weight: 600; }
+        .balance-amount {
+            font-size: 38px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffcc 0%, #00aaff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 6px 0 20px 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 16px;
+        }
+        .stat-item { display: flex; justify-content: space-between; font-size: 13px; color: #a0aec0; }
+        .stat-val { font-weight: 700; color: #ffffff; }
+
+        .ad-trigger-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            border: none;
+            padding: 20px;
+            border-radius: 18px;
+            color: #050b10;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(0, 242, 254, 0.25);
+            margin-bottom: 28px;
+        }
+        .ad-trigger-btn:active { transform: scale(0.98); }
+        .ad-trigger-btn:disabled { background: #15222e; color: #4a5d6e; box-shadow: none; }
+        .badge-reward { background: #050b10; color: #00f2fe; padding: 6px 14px; border-radius: 50px; }
+
+        .section-title { font-size: 15px; font-weight: 700; text-transform: uppercase; color: #7085a0; margin-bottom: 14px; }
+        .task-list { display: flex; flex-direction: column; gap: 12px; }
+        .task-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .task-info { display: flex; align-items: center; gap: 14px; }
+        .task-icon { width: 44px; height: 44px; background: rgba(0, 242, 254, 0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #00f2fe; }
+        .task-name { font-size: 15px; font-weight: 600; color: #ffffff; }
+        .task-reward { font-size: 12px; color: #00ffcc; }
+        .task-action-btn { background: #00f2fe; border: none; padding: 8px 14px; border-radius: 8px; color: #050b10; cursor: pointer; font-size: 12px; font-weight: bold;}
+
+        .nav-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(7, 15, 22, 0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #526882;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .nav-item.active { color: #00f2fe; }
+        .nav-item svg { width: 22px; height: 22px; fill: currentColor; }
     </style>
 </head>
 <body>
 
+    <div class="top-bar">
+        <div class="app-logo"><span>⚡</span> RozKamao Elite</div>
+        <div class="top-contributor">Top VIP</div>
+    </div>
+
+    <!-- TAB 1: EXPLORE -->
     <div id="explore-screen" class="tab-content active">
         <div class="main-card">
+            <div class="user-tag">Secure Connection:</div>
             <div class="username" id="user-display">Loading...</div>
-            <div>Current Balance</div>
+            <div class="balance-label">Current Balance</div>
             <div class="balance-amount" id="balance-display">Fetching...</div>
-            <div style="display:flex; justify-content:space-between; margin-top:15px;">
-                <span>Total Earned: <b id="total-earned">0</b></span>
-                <span>Ads Watched: <b id="ads-count">0</b></span>
+            <div class="stats-grid">
+                <div class="stat-item"><span>Total Earned:</span><span class="stat-val" id="total-earned">0</span></div>
+                <div class="stat-item"><span>Ads Watched:</span><span class="stat-val" id="ads-count">0</span></div>
             </div>
         </div>
 
-        <button class="ad-trigger-btn" id="watch-ad-btn" onclick="showRewardAd()">🎬 X-Ad Verification (₹5)</button>
+        <button class="ad-trigger-btn" id="watch-ad-btn" onclick="showRewardAd()">
+            <span style="display:flex; align-items:center; gap:10px;">🎬 X-Ad Verification</span>
+            <span class="badge-reward">₹5</span>
+        </button>
 
-        <h3>Tasks</h3>
-        <div class="task-card">
-            <div><b>Official Channel</b><br><span style="color:#00ffcc;">+₹10 Earn</span></div>
-            <button onclick="verifyChannelJoin()" style="background:#00f2fe; border:none; padding:8px 12px; border-radius:8px; color:#000;">Join & Verify</button>
+        <div class="section-title">Streamlined Opportunities</div>
+        <div class="task-list">
+            <div class="task-card">
+                <div class="task-info"><div class="task-icon">📢</div><div><div class="task-name">Official Channel</div><div class="task-reward">+₹10 Earn</div></div></div>
+                <button class="task-action-btn" onclick="verifyChannelJoin('https://t.me/+OMk0KYuThopjZDFl')">Join & Verify</button>
+            </div>
         </div>
     </div>
 
-    <div id="missions-screen" class="tab-content"><h3>Missions Screen</h3></div>
-    <div id="network-screen" class="tab-content"><h3>Network Screen</h3></div>
-    <div id="vault-screen" class="tab-content"><h3>Vault Balance: <span id="vault-balance">₹0</span></h3></div>
+    <!-- TAB 2: MISSIONS -->
+    <div id="missions-screen" class="tab-content">
+        <div class="section-title">Available Missions</div>
+        <div class="task-list">
+            <div class="task-card">
+                <div class="task-info"><div class="task-icon">🤝</div><div><div class="task-name">Join Loot Channel</div><div class="task-reward">+₹10 Earn</div></div></div>
+                <button class="task-action-btn" onclick="verifyChannelJoin('https://t.me/+aGpnPjYlzYRhZmQ1')">Join & Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: NETWORK -->
+    <div id="network-screen" class="tab-content">
+        <div class="section-title">Referral Network</div>
+        <div class="main-card" style="text-align: center;">
+            <p style="color: #7085a0; margin-bottom: 10px;">Invite Friends & Multiply Gains</p>
+            <h3 style="color: #00ffcc; margin-bottom: 15px;">Earn ₹10 per Active User</h3>
+            <button class="ad-trigger-btn" style="margin-bottom:0; justify-content:center;" onclick="alert('Link Copied!')">🔗 Copy Invite Link</button>
+        </div>
+    </div>
+
+    <!-- TAB 4: VAULT -->
+    <div id="vault-screen" class="tab-content">
+        <div class="section-title">Secure Vault (Withdrawal)</div>
+        <div class="main-card">
+            <div class="balance-label" style="text-align:center;">Withdrawable Balance</div>
+            <div class="balance-amount" id="vault-balance" style="text-align:center; margin-bottom:15px;">Fetching...</div>
+            <button class="ad-trigger-btn" style="margin-bottom:0; background: linear-gradient(135deg, #00ffcc 0%, #00aaff 100%); justify-content:center;" onclick="alert('Minimum withdrawal is ₹500')">💰 Withdraw Funds</button>
+        </div>
+    </div>
 
     <div class="nav-dock">
-        <div class="nav-item active" onclick="switchTab(this, 'explore-screen')">Explore</div>
-        <div class="nav-item" onclick="switchTab(this, 'missions-screen')">Missions</div>
-        <div class="nav-item" onclick="switchTab(this, 'network-screen')">Network</div>
-        <div class="nav-item" onclick="switchTab(this, 'vault-screen')">Vault</div>
+        <div class="nav-item active" onclick="switchTab(this, 'explore-screen')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Explore</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(this, 'missions-screen')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/></svg><span>Missions</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(this, 'network-screen')">
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Network</span>
+        </div>
+        <div class="nav-item" onclick="switchTab(this, 'vault-screen')">
+            <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2-.9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Vault</span>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        
         const user = tg.initDataUnsafe?.user;
         const userId = user ? user.id.toString() : "12345678";
-        document.getElementById("user-display").innerText = user ? '@'+user.username : "@Guest";
+        const usernameText = user ? (user.username ? '@' + user.username : user.first_name) : "@GuestUser";
+        document.getElementById("user-display").innerText = usernameText;
         
         const BACKEND_URL = "https://rozkamao-backend.onrender.com";
-        let AdController = window.Adsgram?.init({ blockId: "38196" });
+        
+        let AdController = null;
+        if (window.Adsgram && window.Adsgram.init) {
+            AdController = window.Adsgram.init({ blockId: "38196" });
+        }
 
         function switchTab(el, tabId) {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             el.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
 
         async function loadUserBalance() {
             try {
-                const res = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
-                const data = await res.json();
+                const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
+                const data = await response.json();
                 if (data) {
-                    document.getElementById("balance-display").innerText = "₹" + (data.balance || 0);
-                    document.getElementById("vault-balance").innerText = "₹" + (data.balance || 0);
-                    document.getElementById("total-earned").innerText = "₹" + (data.total_earned || 0);
-                    document.getElementById("ads-count").innerText = data.ads_watched || 0;
+                    document.getElementById("balance-display").innerText = "₹" + (data.balance !== undefined ? data.balance : 0);
+                    document.getElementById("vault-balance").innerText = "₹" + (data.balance !== undefined ? data.balance : 0);
+                    document.getElementById("total-earned").innerText = "₹" + (data.total_earned !== undefined ? data.total_earned : 0);
+                    document.getElementById("ads-count").innerText = data.ads_watched || "0";
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+            }
         }
 
         function showRewardAd() {
-            if (!AdController) return alert("Ads not ready");
-            AdController.show().then(async () => {
-                const res = await fetch(`${BACKEND_URL}/api/user`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: userId, action: "watch_ad", amount: 5 })
+            if (!AdController) {
+                alert("Adsgram not loaded. Please wait.");
+                return;
+            }
+            const btn = document.getElementById("watch-ad-btn");
+            btn.disabled = true;
+            
+            AdController.show()
+                .then(async () => {
+                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/user`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ user_id: userId, action: "watch_ad", amount: 5 }) 
+                        });
+                        const updatedData = await response.json();
+                        if(updatedData) {
+                            loadUserBalance();
+                        }
+                    } catch (err) { console.error(err); }
+                    btn.disabled = false;
+                })
+                .catch((err) => {
+                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                    btn.disabled = false;
                 });
-                const data = await res.json();
-                if(data) loadUserBalance();
-            }).catch(e => console.log(e));
         }
 
-        async function verifyChannelJoin() {
-            window.open('https://t.me/+OMk0KYuThopjZDFl', '_blank');
+        async function verifyChannelJoin(inviteLink) {
+            window.open(inviteLink, '_blank');
             setTimeout(async () => {
                 const res = await fetch(`${BACKEND_URL}/api/user`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: userId, action: "join_channel", amount: 10 })
+                    body: JSON.stringify({ user_id: userId, action: "join_channel" })
                 });
                 const data = await res.json();
-                if(data.status === "success" || data.balance) {
-                    alert("Channel Task Verified! ₹10 Added.");
+                if(data) {
+                    alert("Task Updated Successfully!");
                     loadUserBalance();
-                } else {
-                    alert(data.message || "Verification Failed!");
                 }
             }, 5000);
         }
-
+        
         loadUserBalance();
     </script>
 </body>
