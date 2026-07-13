@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import asyncio
+from threading import Thread
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -14,6 +15,9 @@ CORS(app)
 
 DB_FILE = "users_db.json"
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE")
+
+# Yeh line tumhare pichle code me miss ho gayi thi:
+application = Application.builder().token(BOT_TOKEN).build()
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -87,20 +91,16 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ref_link = f"https://t.me/{context.bot.username}?start={user_id}"
         await query.message.reply_text(f"👥 **Aapki Referral Link:**\n{ref_link}\n\nPer refer ₹10 milenge!")
 
-# Polling wrapper background thread issue fix karne ke liye
 def start_bot_polling():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    application = Application.builder().token(BOT_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_click))
     application.run_polling(close_loop=False)
 
 if __name__ == '__main__':
-    from threading import Thread
     t = Thread(target=start_bot_polling, daemon=True)
     t.start()
     
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
-                                                                              
