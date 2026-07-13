@@ -140,7 +140,7 @@
         .task-icon { width: 44px; height: 44px; background: rgba(0, 242, 254, 0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #00f2fe; }
         .task-name { font-size: 15px; font-weight: 600; color: #ffffff; }
         .task-reward { font-size: 12px; color: #00ffcc; }
-        .task-action-btn { background: rgba(255, 255, 255, 0.06); border: none; width: 32px; height: 32px; border-radius: 50px; color: #00f2fe; }
+        .task-action-btn { background: rgba(255, 255, 255, 0.06); border: none; width: 32px; height: 32px; border-radius: 50px; color: #00f2fe; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;}
 
         /* Bottom Floating Navigation Dock */
         .nav-dock {
@@ -202,8 +202,8 @@
         <div class="section-title">Streamlined Opportunities</div>
         <div class="task-list">
             <div class="task-card">
-                <div class="task-info"><div class="task-icon">🔗</div><div><div class="task-name">Quick Boost</div><div class="task-reward">Watch instant shortcuts</div></div></div>
-                <button class="task-action-btn">➔</button>
+                <div class="task-info"><div class="task-icon">📢</div><div><div class="task-name">Official Channel</div><div class="task-reward">Join for latest updates</div></div></div>
+                <button class="task-action-btn" onclick="window.open('https://t.me/+OMk0KYuThopjZDFl', '_blank')">➔</button>
             </div>
         </div>
     </div>
@@ -213,8 +213,8 @@
         <div class="section-title">Available Missions</div>
         <div class="task-list">
             <div class="task-card">
-                <div class="task-info"><div class="task-icon">🤝</div><div><div class="task-name">Join Secure Community</div><div class="task-reward">Earn ₹20 Joining Reward</div></div></div>
-                <button class="task-action-btn" onclick="alert('Community task loading...')">➔</button>
+                <div class="task-info"><div class="task-icon">🤝</div><div><div class="task-name">Join Loot Channel</div><div class="task-reward">Earn Joining Reward</div></div></div>
+                <button class="task-action-btn" onclick="window.open('https://t.me/+aGpnPjYlzYRhZmQ1', '_blank')">➔</button>
             </div>
         </div>
     </div>
@@ -322,5 +322,4 @@
         loadUserBalance();
     </script>
 </body>
-            </html>
-                
+</html>
