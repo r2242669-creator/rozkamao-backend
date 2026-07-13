@@ -7,7 +7,7 @@ import time
 app = Flask(__name__)
 CORS(app)
 
-# 🔥 TERA REAL MONGODB LINK (PASSWORD FIT HAI) AUR REAL TELEGRAM BOT TOKEN
+# 🔥 TERA REAL MONGODB LINK AUR REAL TELEGRAM BOT TOKEN
 MONGO_URL = "mongodb+srv://Rahul2242669:Rahul8955@cluster0.ot3slvg.mongodb.net/?appName=Cluster0"
 BOT_TOKEN = "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"  
 ADMIN_PASSWORD = "MERA_SECRET_PASSWORD_123"
@@ -29,40 +29,50 @@ def get_user_db(uid):
         users_collection.insert_one(user)
     return user
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return jsonify({"status": "running", "database": "MongoDB Connected Successfully"})
+    return jsonify({"status": "running", "database": "MongoDB Connected Successfully"}), 200
 
 # --- 🤖 TELEGRAM BOT CONTROLLER (FOR /START COMMAND) ---
-@app.route('/api/telegram', methods=['POST'])
+@app.route('/api/telegram', methods=['GET', 'POST'])
 def telegram_webhook():
-    update = request.json or {}
-    if "message" in update:
-        chat_id = update["message"]["chat"]["id"]
-        text = update["message"].get("text", "")
-        
-        if text.startswith("/start"):
-            # Tere Frontend ka Main GitHub Pages link
-            mini_app_url = "https://r2242669-creator.github.io/rozkamao-backend/" 
+    # Agar Telegram se koi request aaye
+    if request.method == 'POST':
+        try:
+            update = request.json or {}
             
-            reply_markup = {
-                "inline_keyboard": [[
-                    {"text": "🚀 Open RozKamao App", "web_app": {"url": mini_app_url}}
-                ]]
-            }
+            # Agar data sahi format mein na ho toh error block karein
+            if not isinstance(update, dict):
+                return jsonify({"status": "invalid format"}), 200
+                
+            if "message" in update:
+                chat_id = update["message"]["chat"]["id"]
+                text = update["message"].get("text", "")
+                
+                if text.startswith("/start"):
+                    # Tere Frontend ka Main GitHub Pages link
+                    mini_app_url = "https://r2242669-creator.github.io/rozkamao-backend/" 
+                    
+                    reply_markup = {
+                        "inline_keyboard": [[
+                            {"text": "🚀 Open RozKamao App", "web_app": {"url": mini_app_url}}
+                        ]]
+                    }
+                    
+                    payload = {
+                        "chat_id": chat_id,
+                        "text": "👋 Welcome to RozKamao Elite!\n\nNiche diye gaye button par click karke App kholein, Ads dekhein aur earning shuru karein!",
+                        "reply_markup": reply_markup
+                    }
+                    
+                    requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json=payload, timeout=5)
+        except Exception as e:
+            print(f"Webhook Error: {e}")
             
-            payload = {
-                "chat_id": chat_id,
-                "text": "👋 Welcome to RozKamao Elite!\n\nNiche diye gaye button par click karke App kholein, Ads dekhein aur earning shuru karein!",
-                "reply_markup": reply_markup
-            }
-            
-            try:
-                requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json=payload, timeout=5)
-            except Exception as e:
-                print(f"Telegram error: {e}")
-            
-    return jsonify({"status": "ok"})
+        return jsonify({"status": "ok"}), 200
+
+    # Normal GET request par status check dikhaye
+    return jsonify({"status": "webhook route is active"}), 200
 
 # --- USER BALANCES & DATA MANAGEMENT ---
 @app.route('/api/user', methods=['GET', 'POST'])
