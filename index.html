@@ -218,82 +218,95 @@
     </div>
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand();
+tg.expand();
 
-    const user = tg.initDataUnsafe?.user;
-    const userId = user ? user.id.toString() : "12345678";
-    const usernameText = user ? (user.username ? '@' + user.username : user.first_name) : "Guest";
+// Telegram se user data nikalna
+const user = tg.initDataUnsafe?.user;
+const userId = user ? user.id.toString() : "12345678";
+const usernameText = user ? (user.username ? '@' + user.username : user.first_name) : "Guest";
+
+// Screen par Username set karna
+if(document.getElementById("user-display")) {
     document.getElementById("user-display").innerText = usernameText;
+}
 
-    const BACKEND_URL = "https://rozkamao-backend.onrender.com";
+const BACKEND_URL = "https://rozkamao-backend.onrender.com";
 
-    // 🌟 Adsgram Configuration (Pehli ID + Fixed Domain)
-    let AdController = null;
-    if (window.Adsgram && window.Adsgram.init) {
-        AdController = window.Adsgram.init({ 
-            blockId: "38196", 
-            debug: false,
-            domain: "https://r2242669-creator.github.io" 
+// 🌟 Adsgram Setup (Fixed Domain ke sath)
+let AdController = null;
+if (window.Adsgram && window.Adsgram.init) {
+    AdController = window.Adsgram.init({ 
+        blockId: "38196", 
+        debug: false,
+        domain: "https://r2242669-creator.github.io" 
+    });
+}
+
+// Tab badalne ka function
+function switchTab(el, tabId) {
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+// 💰 Backend se user ka real balance fetch karne wala function
+async function loadUserBalance() {
+    try {
+        // GET Request: Backend se data mangwana
+        const response = await fetch(`${BACKEND_URL}/api/user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, action: "get_balance" }) // Normal load par balance check karega
         });
-    }
-
-    // Tab switcher function
-    function switchTab(el, tabId) {
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        el.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-    }
-
-    // Balance display karne wala function
-    async function loadUserBalance() {
-        try {
-            const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
-            const data = await response.json();
-            if (data) {
-                document.getElementById("balance-display").innerText = data.balance || 0;
-                document.getElementById("vault-balance").innerText = data.balance || 0;
-                document.getElementById("total-earned").innerText = data.total_earned || 0;
-                document.getElementById("ads-count").innerText = data.ads_watched || 0;
-            }
-        } catch (e) {
-            console.error("Error loading balance:", e);
+        const data = await response.json();
+        
+        if (data) {
+            // HTML elements ke IDs ke hisaab se values badalna
+            if(document.getElementById("balance-display")) document.getElementById("balance-display").innerText = "₹" + (data.balance || 0);
+            if(document.getElementById("vault-balance")) document.getElementById("vault-balance").innerText = "₹" + (data.balance || 0);
+            if(document.getElementById("total-earned")) document.getElementById("total-earned").innerText = data.total_earned || 0;
+            if(document.getElementById("ads-count")) document.getElementById("ads-count").innerText = data.ads_watched || 0;
         }
+    } catch (e) {
+        console.error("Balance fetch karne mein error:", e);
+    }
+}
+
+// 📺 Tumhare HTML Ke Button ke liye Match hone wala Function Name
+function showRewardAd() {
+    if (!AdController) {
+        alert("Ad Network abhi load nahi hua, please 2-3 second ruk kar try karein!");
+        return;
     }
 
-    // 📺 Ad dikhane aur Balance badhane wala function (Iska button bana lena front-end par)
-    function watchAdToEarn() {
-        if (!AdController) {
-            alert("Ad network load nahi hua, thoda wait karein!");
-            return;
-        }
-
-        AdController.show().then(async (result) => {
-            if (result.done) {
-                // Ad poori dekhne par Backend ko notify karein
-                try {
-                    const response = await fetch(`${BACKEND_URL}/api/user`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: userId, action: "watch_ad" })
-                    });
-                    const data = await response.json();
-                    alert("Badhai ho! Aapko ₹5 mile.");
-                    loadUserBalance(); // Screen par naya balance update karein
-                } catch (err) {
-                    console.error("Backend update failed:", err);
-                }
-            } else {
-                alert("Aapne ad poori nahi dekhi, isliye reward nahi mila.");
+    AdController.show().then(async (result) => {
+        if (result.done) {
+            // Ad poori dekhne par backend par paise bhejna
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/user`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, action: "watch_ad" })
+                });
+                const data = await response.json();
+                alert("Shaandar! Aapko ₹5 mil gaye hain.");
+                loadUserBalance(); // Naya balance screen par update karein
+            } catch (err) {
+                console.error("Backend update fail hua:", err);
             }
-        }).catch((err) => {
-            console.error("Ad error:", err);
-            alert("Ad load hone mein dikkat aayi.");
-        });
-    }
+        } else {
+            alert("Aapne ad poori nahi dekhi, isliye reward nahi mila.");
+        }
+    }).catch((err) => {
+        console.error("Ad error:", err);
+        alert("Ad load hone mein koi dikkat aayi.");
+    });
+}
 
-    // Page load hote hi balance fetch karein
-    loadUserBalance();
+// Page khulte hi balance load karo
+loadUserBalance();
+    
         </script>
     
 </body>
