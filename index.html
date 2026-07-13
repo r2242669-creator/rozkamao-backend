@@ -216,93 +216,86 @@
             <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2-.9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Vault</span>
         </div>
     </div>
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        const user = tg.initDataUnsafe?.user;
-        const userId = user ? user.id.toString() : "12345678";
-        const usernameText = user ? (user.username ? '@' + user.username : user.first_name) : "@GuestUser";
-        document.getElementById("user-display").innerText = usernameText;
-        
-        const BACKEND_URL = "https://rozkamao-backend.onrender.com";
-        
-        let AdController = null;
-        if (window.Adsgram && window.Adsgram.init) {
-            AdController = window.Adsgram.init({ blockId: "38196" });
-        }
+    const user = tg.initDataUnsafe?.user;
+    const userId = user ? user.id.toString() : "12345678";
+    const usernameText = user ? (user.username ? '@' + user.username : user.first_name) : "Guest";
+    document.getElementById("user-display").innerText = usernameText;
 
-        function switchTab(el, tabId) {
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            el.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
+    const BACKEND_URL = "https://rozkamao-backend.onrender.com";
 
-        async function loadUserBalance() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
-                const data = await response.json();
-                if (data) {
-                    document.getElementById("balance-display").innerText = "₹" + (data.balance !== undefined ? data.balance : 0);
-                    document.getElementById("vault-balance").innerText = "₹" + (data.balance !== undefined ? data.balance : 0);
-                    document.getElementById("total-earned").innerText = "₹" + (data.total_earned !== undefined ? data.total_earned : 0);
-                    document.getElementById("ads-count").innerText = data.ads_watched || "0";
-                }
-            } catch (e) { 
-                console.error(e);
+    // 🌟 Adsgram Configuration (Pehli ID + Fixed Domain)
+    let AdController = null;
+    if (window.Adsgram && window.Adsgram.init) {
+        AdController = window.Adsgram.init({ 
+            blockId: "38196", 
+            debug: false,
+            domain: "https://r2242669-creator.github.io" 
+        });
+    }
+
+    // Tab switcher function
+    function switchTab(el, tabId) {
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // Balance display karne wala function
+    async function loadUserBalance() {
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`);
+            const data = await response.json();
+            if (data) {
+                document.getElementById("balance-display").innerText = data.balance || 0;
+                document.getElementById("vault-balance").innerText = data.balance || 0;
+                document.getElementById("total-earned").innerText = data.total_earned || 0;
+                document.getElementById("ads-count").innerText = data.ads_watched || 0;
             }
+        } catch (e) {
+            console.error("Error loading balance:", e);
+        }
+    }
+
+    // 📺 Ad dikhane aur Balance badhane wala function (Iska button bana lena front-end par)
+    function watchAdToEarn() {
+        if (!AdController) {
+            alert("Ad network load nahi hua, thoda wait karein!");
+            return;
         }
 
-        function showRewardAd() {
-            if (!AdController) {
-                alert("Adsgram not loaded. Please wait.");
-                return;
-            }
-            const btn = document.getElementById("watch-ad-btn");
-            btn.disabled = true;
-            
-            AdController.show()
-                .then(async () => {
-                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    try {
-                        const response = await fetch(`${BACKEND_URL}/api/user`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ user_id: userId, action: "watch_ad", amount: 5 }) 
-                        });
-                        const updatedData = await response.json();
-                        if(updatedData) {
-                            loadUserBalance();
-                        }
-                    } catch (err) { console.error(err); }
-                    btn.disabled = false;
-                })
-                .catch((err) => {
-                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-                    btn.disabled = false;
-                });
-        }
-
-        async function verifyChannelJoin(inviteLink) {
-            window.open(inviteLink, '_blank');
-            setTimeout(async () => {
-                const res = await fetch(`${BACKEND_URL}/api/user`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ user_id: userId, action: "join_channel" })
-                });
-                const data = await res.json();
-                if(data) {
-                    alert("Task Updated Successfully!");
-                    loadUserBalance();
+        AdController.show().then(async (result) => {
+            if (result.done) {
+                // Ad poori dekhne par Backend ko notify karein
+                try {
+                    const response = await fetch(`${BACKEND_URL}/api/user`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId, action: "watch_ad" })
+                    });
+                    const data = await response.json();
+                    alert("Badhai ho! Aapko ₹5 mile.");
+                    loadUserBalance(); // Screen par naya balance update karein
+                } catch (err) {
+                    console.error("Backend update failed:", err);
                 }
-            }, 5000);
-        }
-        
-        loadUserBalance();
-    </script>
+            } else {
+                alert("Aapne ad poori nahi dekhi, isliye reward nahi mila.");
+            }
+        }).catch((err) => {
+            console.error("Ad error:", err);
+            alert("Ad load hone mein dikkat aayi.");
+        });
+    }
+
+    // Page load hote hi balance fetch karein
+    loadUserBalance();
+        </script>
+    
 </body>
     </html>
     
