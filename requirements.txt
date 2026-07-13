@@ -1,7 +1,5 @@
-flask
+Flask
 flask-cors
-python-telegram-bot==20.8
-gunicorn
+pymongo
 requests
 dnspython
-
