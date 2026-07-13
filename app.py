@@ -7,12 +7,12 @@ import time
 app = Flask(__name__)
 CORS(app)
 
-# 🚨 APNA REAL MONGODB LINK DALEIN AUR <db_password> KO HATA KAR REAL PASSWORD LIKHEIN
-MONGO_URL = "mongodb+srv://Rahul2242669:APNA_PASSWORD_YAHAN_LIKH@cluster0.ot3slvg.mongodb.net/?appName=Cluster0"
-BOT_TOKEN = "7334751430:AAElb8W_aN42b-W0m85yS5g6j8s_Xexample"  # <-- REAL TG BOT TOKEN HERE
+# 🔥 TERA REAL MONGODB LINK (PASSWORD FIT HAI) AUR REAL TELEGRAM BOT TOKEN
+MONGO_URL = "mongodb+srv://Rahul2242669:Rahul8955@cluster0.ot3slvg.mongodb.net/?appName=Cluster0"
+BOT_TOKEN = "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"  
 ADMIN_PASSWORD = "MERA_SECRET_PASSWORD_123"
 
-# MongoDB Database Connector Setup
+# MongoDB Database Connection Setup
 client = MongoClient(MONGO_URL)
 db = client['rozkamao_db']
 users_collection = db['users']
@@ -31,7 +31,38 @@ def get_user_db(uid):
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"status": "running", "database": "MongoDB Connected"})
+    return jsonify({"status": "running", "database": "MongoDB Connected Successfully"})
+
+# --- 🤖 TELEGRAM BOT CONTROLLER (FOR /START COMMAND) ---
+@app.route('/api/telegram', methods=['POST'])
+def telegram_webhook():
+    update = request.json or {}
+    if "message" in update:
+        chat_id = update["message"]["chat"]["id"]
+        text = update["message"].get("text", "")
+        
+        if text.startswith("/start"):
+            # Tere Frontend ka Main GitHub Pages link
+            mini_app_url = "https://r2242669-creator.github.io/rozkamao-backend/" 
+            
+            reply_markup = {
+                "inline_keyboard": [[
+                    {"text": "🚀 Open RozKamao App", "web_app": {"url": mini_app_url}}
+                ]]
+            }
+            
+            payload = {
+                "chat_id": chat_id,
+                "text": "👋 Welcome to RozKamao Elite!\n\nNiche diye gaye button par click karke App kholein, Ads dekhein aur earning shuru karein!",
+                "reply_markup": reply_markup
+            }
+            
+            try:
+                requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", json=payload, timeout=5)
+            except Exception as e:
+                print(f"Telegram error: {e}")
+            
+    return jsonify({"status": "ok"})
 
 # --- USER BALANCES & DATA MANAGEMENT ---
 @app.route('/api/user', methods=['GET', 'POST'])
@@ -53,7 +84,6 @@ def user_route():
         if not uid:
             return jsonify({"error": "Missing user_id"}), 400
             
-        # 1. Action Watch Ad -> Increments Balance + Ads Count 
         if action == "watch_ad" or request.args.get('add_balance'):
             add_val = amount if amount else 5
             users_collection.update_one(
@@ -61,7 +91,6 @@ def user_route():
                 {"$inc": {"balance": add_val, "total_earned": add_val, "ads_watched": 1}}
             )
             
-        # 2. Action Join Channel Task -> Rewards 10 Rs
         elif action == "join_channel":
             users_collection.update_one(
                 {"user_id": uid},
@@ -93,7 +122,7 @@ def broadcast():
             res = requests.post(url, json={"chat_id": uid, "text": msg}, timeout=4)
             if res.status_code == 200:
                 success += 1
-            time.sleep(0.05) # Safe gap to avoid Telegram Ban
+            time.sleep(0.05) 
         except:
             pass
             
