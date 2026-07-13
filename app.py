@@ -1,7 +1,8 @@
-
 import os
 import json
 import logging
+import asyncio
+import threading
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
@@ -89,25 +90,22 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text(f"👥 **Aapki Referral Link:**\n{ref_link}\n\nPer refer ₹10 milenge!")
 
 def run_bot():
-    import asyncio
-    try:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        application = Application.builder().token(BOT_TOKEN).build()
-        application.add_handler(CommandHandler("start", start))
-        application.add_handler(CallbackQueryHandler(button_click))
-        
-        loop.run_until_complete(application.initialize())
-        loop.run_until_complete(application.updater.start_polling())
-        loop.run_until_complete(application.start())
-        loop.run_forever()
-    except Exception as e:
-        logging.error(f"Bot crash error: {e}")
+    # Naye version ke mutabik bina conflict ke polling run karne ka tarika
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    application = Application.builder().token(BOT_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CallbackQueryHandler(button_click))
+    
+    # Ye internal methods ko secure rakhta hai background thread mein
+    application.run_polling(close_loop=False)
 
 if __name__ == '__main__':
-    import threading
+    # Bot ko background thread me chalu karo
     t = threading.Thread(target=run_bot, daemon=True)
     t.start()
     
+    # Flask application start karo
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+    
