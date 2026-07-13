@@ -22,8 +22,6 @@
             padding-bottom: 90px;
             min-height: 100vh;
         }
-        
-        /* Top Navigation Header */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -50,16 +48,9 @@
             font-weight: 600;
             color: #00f2fe;
         }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        /* Dynamic Tab Screens */
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Hero Main Balance Card */
         .main-card {
             background: linear-gradient(145deg, rgba(16, 37, 49, 0.7) 0%, rgba(7, 15, 22, 0.9) 100%);
             border: 1px solid rgba(0, 242, 254, 0.15);
@@ -68,23 +59,9 @@
             margin-bottom: 20px;
             box-shadow: 0 16px 32px rgba(0,0,0,0.5);
         }
-        .user-tag {
-            font-size: 13px;
-            color: #7085a0;
-            margin-bottom: 4px;
-        }
-        .username {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .balance-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #7085a0;
-            font-weight: 600;
-        }
+        .user-tag { font-size: 13px; color: #7085a0; margin-bottom: 4px; }
+        .username { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .balance-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #7085a0; font-weight: 600; }
         .balance-amount {
             font-size: 38px;
             font-weight: 900;
@@ -100,18 +77,9 @@
             border-top: 1px solid rgba(255,255,255,0.06);
             padding-top: 16px;
         }
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #a0aec0;
-        }
-        .stat-val {
-            font-weight: 700;
-            color: #ffffff;
-        }
+        .stat-item { display: flex; justify-content: space-between; font-size: 13px; color: #a0aec0; }
+        .stat-val { font-weight: 700; color: #ffffff; }
 
-        /* Mega Ads Button Trigger */
         .ad-trigger-btn {
             width: 100%;
             background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
@@ -132,7 +100,6 @@
         .ad-trigger-btn:disabled { background: #15222e; color: #4a5d6e; box-shadow: none; }
         .badge-reward { background: #050b10; color: #00f2fe; padding: 6px 14px; border-radius: 50px; }
 
-        /* General List Styling for Screens */
         .section-title { font-size: 15px; font-weight: 700; text-transform: uppercase; color: #7085a0; margin-bottom: 14px; }
         .task-list { display: flex; flex-direction: column; gap: 12px; }
         .task-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -142,7 +109,6 @@
         .task-reward { font-size: 12px; color: #00ffcc; }
         .task-action-btn { background: rgba(255, 255, 255, 0.06); border: none; width: 32px; height: 32px; border-radius: 50px; color: #00f2fe; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;}
 
-        /* Bottom Floating Navigation Dock */
         .nav-dock {
             position: fixed;
             bottom: 0;
@@ -173,21 +139,18 @@
 </head>
 <body>
 
-    <!-- Top Status Header -->
     <div class="top-bar">
         <div class="app-logo"><span>⚡</span> RozKamao Elite</div>
         <div class="top-contributor">Top VIP</div>
     </div>
 
-    <!-- TAB 1: EXPLORE (HOME) -->
+    <!-- TAB 1: EXPLORE -->
     <div id="explore-screen" class="tab-content active">
         <div class="main-card">
             <div class="user-tag">Secure Connection:</div>
             <div class="username" id="user-display">Loading...</div>
-            
             <div class="balance-label">Current Balance</div>
             <div class="balance-amount" id="balance-display">Fetching...</div>
-            
             <div class="stats-grid">
                 <div class="stat-item"><span>Total Earned:</span><span class="stat-val" id="total-earned">Fetching...</span></div>
                 <div class="stat-item"><span>Ads Watched:</span><span class="stat-val" id="ads-count">0</span></div>
@@ -239,23 +202,18 @@
         </div>
     </div>
 
-    <!-- Bottom Fixed Navigation Dock -->
     <div class="nav-dock">
         <div class="nav-item active" onclick="switchTab(this, 'explore-screen')">
-            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span>Explore</span>
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Explore</span>
         </div>
         <div class="nav-item" onclick="switchTab(this, 'missions-screen')">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/></svg>
-            <span>Missions</span>
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2zm0 8H7v-2h10v2z"/></svg><span>Missions</span>
         </div>
         <div class="nav-item" onclick="switchTab(this, 'network-screen')">
-            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-            <span>Network</span>
+            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><span>Network</span>
         </div>
         <div class="nav-item" onclick="switchTab(this, 'vault-screen')">
-            <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-            <span>Vault</span>
+            <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Vault</span>
         </div>
     </div>
 
@@ -269,7 +227,11 @@
         document.getElementById("user-display").innerText = usernameText;
         
         const BACKEND_URL = "https://rozkamao-backend.onrender.com";
-        const AdController = window.Adsgram.init({ blockId: "38196" });
+        
+        let AdController = null;
+        if (window.Adsgram && window.Adsgram.init) {
+            AdController = window.Adsgram.init({ blockId: "38196" });
+        }
 
         function switchTab(el, tabId) {
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
@@ -297,6 +259,10 @@
         }
 
         function showRewardAd() {
+            if (!AdController) {
+                alert("Adsgram SDK load nahi ho paya. Dobara try karein.");
+                return;
+            }
             const btn = document.getElementById("watch-ad-btn");
             btn.disabled = true;
             
@@ -307,7 +273,6 @@
                         const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            // Balance aur Ad Count dono update karne ke liye parameters
                             body: JSON.stringify({ add_balance: 5, watch_ad: true }) 
                         });
                         const updatedData = await response.json();
@@ -327,4 +292,5 @@
         loadUserBalance();
     </script>
 </body>
-</html>
+                </html>
+    
