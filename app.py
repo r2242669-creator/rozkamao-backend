@@ -2,11 +2,10 @@ import os
 import json
 import logging
 import asyncio
-import threading
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -14,6 +13,10 @@ app = Flask(__name__)
 CORS(app)
 
 DB_FILE = "users_db.json"
+BOT_TOKEN = "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"
+
+# Global Application instance
+bot_app = None
 
 def load_db():
     if os.path.exists(DB_FILE):
@@ -48,8 +51,6 @@ def sync_user():
             save_db(db)
             
     return jsonify(db[user_id])
-
-BOT_TOKEN = "8748256683:AAFhr_cxEFWR3a71e6AQQtb8S-bAGFPTvGE"
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -89,19 +90,23 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ref_link = f"https://t.me/{context.bot.username}?start={user_id}"
         await query.message.reply_text(f"👥 **Aapki Referral Link:**\n{ref_link}\n\nPer refer ₹10 milenge!")
 
-def run_bot():
-    # Loop setup jo background thread me strictly isolated chalega
-    asyncio.set_event_loop(asyncio.new_event_loop())
-    application = ApplicationBuilder().token(BOT_TOKEN).build()
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(button_click))
-    
-    # Naye python aur library variables ke liye completely safe execution
-    application.run_polling(close_loop=False)
+# Flask startup standard hook jo bina background thread ke directly bot initialize karega
+@app.before_all_requests
+async def startup_bot():
+    global bot_app
+    if bot_app is None:
+        logging.info("Initializing Telegram Bot...")
+        bot_app = Application.builder().token(BOT_TOKEN).build()
+        bot_app.add_handler(CommandHandler("start", start))
+        bot_app.add_handler(CallbackQueryHandler(button_click))
+        
+        # Safe async polling triggers
+        await bot_app.initialize()
+        await bot_app.start()
+        await bot_app.updater.start_polling(drop_pending_updates=True)
+        logging.info("Bot started successfully via Main Thread Hook!")
 
 if __name__ == '__main__':
-    t = threading.Thread(target=run_bot, daemon=True)
-    t.start()
-    
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+                  
