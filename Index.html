@@ -86,7 +86,7 @@
             font-weight: 600;
         }
         .balance-amount {
-            font-size: 46px;
+            font-size: 38px;
             font-weight: 900;
             background: linear-gradient(135deg, #00ffcc 0%, #00aaff 100%);
             -webkit-background-clip: text;
@@ -183,13 +183,13 @@
     <div id="explore-screen" class="tab-content active">
         <div class="main-card">
             <div class="user-tag">Secure Connection:</div>
-            <div class="username" id="user-display">@ASHH4X</div>
+            <div class="username" id="user-display">Loading...</div>
             
             <div class="balance-label">Current Balance</div>
-            <div class="balance-amount" id="balance-display">₹0</div>
+            <div class="balance-amount" id="balance-display">Fetching...</div>
             
             <div class="stats-grid">
-                <div class="stat-item"><span>Total Earned:</span><span class="stat-val" id="total-earned">₹0</span></div>
+                <div class="stat-item"><span>Total Earned:</span><span class="stat-val" id="total-earned">Fetching...</span></div>
                 <div class="stat-item"><span>Ads Watched:</span><span class="stat-val" id="ads-count">0</span></div>
             </div>
         </div>
@@ -234,7 +234,7 @@
         <div class="section-title">Secure Vault (Withdrawal)</div>
         <div class="main-card">
             <div class="balance-label" style="text-align:center;">Withdrawable Balance</div>
-            <div class="balance-amount" id="vault-balance" style="text-align:center; margin-bottom:15px;">₹0</div>
+            <div class="balance-amount" id="vault-balance" style="text-align:center; margin-bottom:15px;">Fetching...</div>
             <button class="ad-trigger-btn" style="margin-bottom:0; background: linear-gradient(135deg, #00ffcc 0%, #00aaff 100%); justify-content:center;" onclick="alert('Minimum withdrawal is ₹500')">💰 Withdraw Funds</button>
         </div>
     </div>
@@ -271,7 +271,6 @@
         const BACKEND_URL = "https://rozkamao-backend.onrender.com";
         const AdController = window.Adsgram.init({ blockId: "38196" });
 
-        // Tab Switching Logic
         function switchTab(el, tabId) {
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -289,7 +288,12 @@
                     document.getElementById("total-earned").innerText = "₹" + (data.total_earned || data.balance);
                     document.getElementById("ads-count").innerText = data.ads_watched || "0";
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                document.getElementById("balance-display").innerText = "₹0";
+                document.getElementById("vault-balance").innerText = "₹0";
+                document.getElementById("total-earned").innerText = "₹0";
+            }
         }
 
         function showRewardAd() {
@@ -303,7 +307,8 @@
                         const response = await fetch(`${BACKEND_URL}/api/user?user_id=${userId}`, {
                             method: "POST",
                             headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ add_balance: 5 })
+                            // Balance aur Ad Count dono update karne ke liye parameters
+                            body: JSON.stringify({ add_balance: 5, watch_ad: true }) 
                         });
                         const updatedData = await response.json();
                         document.getElementById("balance-display").innerText = "₹" + updatedData.balance;
